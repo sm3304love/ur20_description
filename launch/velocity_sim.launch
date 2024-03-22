@@ -26,7 +26,7 @@
   <node name="spawn_target" 
         pkg="gazebo_ros" 
         type="spawn_model" 
-        args="-file $(find franka_panda_description)/urdf/target.urdf -urdf -model target
+        args="-file $(find ur20_description)/urdf/target.urdf -urdf -model target
         -x -1.1951206922531128
         -y -0.36688193678855896
         -z 0.8016256093978882
