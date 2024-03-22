@@ -1,0 +1,64 @@
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="true"/>
+    </include>
+
+  <node
+    name="spawn_model"
+    pkg="gazebo_ros"
+    type="spawn_model"
+    args="-file $(find ur20_description)/urdf/ur20.urdf -urdf  -model ur20
+    -J shoulder_pan_joint 0
+    -J shoulder_lift_joint -1.0
+    -J elbow_joint 1.0
+    -J wrist_1_joint 0
+    -J wrist_2_joint 0
+    -J wrist_3_joint 0
+    "
+    output="screen" />
+    
+  <node
+    name="fake_joint_calibration"
+    pkg="rostopic"
+    type="rostopic"
+    args="pub /calibrated std_msgs/Bool true" />
+  
+  <node name="spawn_target" 
+        pkg="gazebo_ros" 
+        type="spawn_model" 
+        args="-file $(find franka_panda_description)/urdf/target.urdf -urdf -model target
+        -x -1.1951206922531128
+        -y -0.36688193678855896
+        -z 0.8016256093978882
+        -R 1.5708
+        -P 0.0
+        -Y 0.0 " />
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="use_gui" value="False"/>
+  </node>
+
+  <param name="robot_description" command="$(find xacro)/xacro $(find ur20_description)/urdf/ur20.urdf " />
+
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    respawn="true" output="screen">
+    <remap from="/joint_states" to="/panda/joint_states" />
+  </node>
+
+  <rosparam file="$(find ur20_description)/controller/ur20_controller.yaml" command="load"/>
+
+
+  <node name="controller_spawner"
+      pkg="controller_manager" 
+      type="spawner" 
+      respawn="false"
+    	output="screen" 
+      ns="/ur20" 
+      args="joint_state_controller
+      ur20_joint_controller
+      "/>
+
+  <!-- <node name="trajectory_pub" pkg="target_trajectory" type="trajectory_pub"/> -->
+</launch>
+
